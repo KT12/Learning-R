@@ -1,6 +1,3 @@
-library(pitchRx)
-
-# get data from the no hitter game
 bdat <- scrape(game.ids='gid_2015_06_20_pitmlb_wasmlb_1')
 
 # get the at bat and pitch data from the scraped data
@@ -29,19 +26,17 @@ temp[which(temp=='FC')] <- 'Cut fastball'
 
 nh$pitch_description <- temp
 
-# prep stand_xcoord so that L and R show up in batter's box
-stand_xcoord <- nh$stand
+batter <- 'Pedro Alvarez'
+inning <- 5
+
+
+ab <- nh %>% filter(batter_name==batter, inning.x==inning)
+
+stand_xcoord <- ab$stand
 stand_xcoord[which(stand_xcoord=='R')] <- -1.5
 stand_xcoord[which(stand_xcoord=='L')] <- 1.5
 stand_xcoord <- as.numeric(stand_xcoord)
-nh$stand_xcoord <- stand_xcoord
-
-# Reorder stand as factor so R is first factor
-# This places right handed batter on the left side
-nh$stand <- factor(nh$stand, levels=c('R','L'))
-
-batter <- 'Pedro Alvarez'
-inning <- 5
+ab$stand_xcoord <- stand_xcoord
 
 # plot the strikezone
 ggplot()+
@@ -52,7 +47,7 @@ ggplot()+
   xlab('feet from home plate') +
   ylab('feet above the ground') +
   # plot the pitches
-  geom_point(data=nh, aes(x=px, y=pz,size=start_speed,color=pitch_description)) +
+  geom_point(data=ab, aes(x=px, y=pz,size=start_speed,color=pitch_description)) +
   # smallest points for slower pitches are too small, adjust scale
   # scale means size vs regular dot
   scale_size(range=c(2,4)) +
@@ -67,22 +62,20 @@ ggplot()+
   # can also set colors manually
   # check colors by using colors() or hexadecimals
   scale_color_manual(values=c('red','blue','green','#FFFF99','purple')) +
-
+  
   # If using pitch types, must change pitch_description to factor vector
   # from a chr vector
   ### nh$pitch_description <- factor(nh$pitch_description, levels=c('Fastball', 'Cut fastball', 'Slider', 'Curveball', 'Change-up'))
 
-  # want to see platoon splits with two charts
-  ### facet_wrap(~stand) +
   
-  # facet the charts by at bat 'num'
-  facet_wrap(~num) +
   # adding text somehwere on the plot
-  geom_text(data=nh, aes(label=stand, x=stand_xcoord), y=2.5, size=5) +
+  geom_text(data=ab, aes(label=stand, x=stand_xcoord), y=2.5, size=5) +
   
   # add batter name to each at bat plot
-  geom_text(data=nh, aes(label=batter_name), x=0, y=0.5, size=3) +
+  geom_text(data=ab, aes(label=batter_name), x=0, y=0.5, size=3) +
   
   # add inning
-  geom_text(data=nh, aes(label=inning.x), x=0, y=4.5, size = 3)
-
+  geom_text(data=ab, aes(label=inning.x), x=0, y=4.5, size = 3) +
+  
+  xlim(-2,2) + 
+  ylim(0,4.5)
