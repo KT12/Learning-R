@@ -18,6 +18,28 @@ x <- c(-0.95, 0.95, 0.95, -0.95, -0.95)
 z <- c(1.6,1.6,3.5,3.5,1.6)
 sz <- data.frame(x,z)
 
+# creating better pitch labels
+temp <- nh$pitch_type
+temp[which(temp=='FF')] <- 'Fastball'
+temp[which(temp=='CU')] <- 'Curveball'
+temp[which(temp=='CH')] <- 'Change-up'
+temp[which(temp=='SL')] <- 'Slider'
+temp[which(temp=='FF')] <- 'Fastball'
+temp[which(temp=='FC')] <- 'Cut fastball'
+
+nh$pitch_description <- temp
+
+# prep stand_xcoord so that L and R show up in batter's box
+stand_xcoord <- nh$stand
+stand_xcoord[which(stand_xcoord=='R')] <- -1.5
+stand_xcoord[which(stand_xcoord=='L')] <- 1.5
+stand_xcoord <- as.numeric(stand_xcoord)
+nh$stand_xcoord <- stand_xcoord
+
+# Reorder stand as factor so R is first factor
+# This places right handed batter on the left side
+nh$stand <- factor(nh$stand, levels=c('R','L'))
+
 # plot the strikezone
 ggplot()+
   # set up strike zone square
@@ -47,17 +69,10 @@ ggplot()+
   # from a chr vector
   ### nh$pitch_description <- factor(nh$pitch_description, levels=c('Fastball', 'Cut fastball', 'Slider', 'Curveball', 'Change-up'))
 
-  # want to see platoon splits
-  facet_wrap(~stand)
+  # want to see platoon splits with two charts
+  facet_wrap(~stand) +
+  
+  # adding text somehwere on the plot
+  geom_text(data=nh, aes(label=stand, x=stand_xcoord), y=2.5, size=12)
 
 
-# creating better pitch labels
-temp <- nh$pitch_type
-temp[which(temp=='FF')] <- 'Fastball'
-temp[which(temp=='CU')] <- 'Curveball'
-temp[which(temp=='CH')] <- 'Change-up'
-temp[which(temp=='SL')] <- 'Slider'
-temp[which(temp=='FF')] <- 'Fastball'
-temp[which(temp=='FC')] <- 'Cut fastball'
-
-nh$pitch_description <- temp
