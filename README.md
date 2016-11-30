@@ -1,2 +1,2 @@
-# Learning-R
-Just some exercises to learn R.
+# R
+Just some exercises to learn R through various tutorials
