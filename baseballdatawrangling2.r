@@ -1,6 +1,3 @@
-library(dplyr)
-library(ggplot2)
-
 bavg <- inner_join(days, events, by=c('gameid')) %>%
   mutate(Year=substr(date, 1, 4)) %>%
   mutate(Month=substr(date, 5, 6)) %>%
